@@ -7,9 +7,9 @@ import { useContext } from "react";
 const MainNavigation = () => {
   const authCtx = useContext(AuthContext);
   const isLoggedIn = authCtx.isLoggedIn;
-const logoutHandler=()=>{
-  authCtx.logout();
-}
+  const logoutHandler = () => {
+    authCtx.logout();
+  };
   return (
     <header className={classes.header}>
       <Link to="/">
