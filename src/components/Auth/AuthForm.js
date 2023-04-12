@@ -70,6 +70,7 @@ const AuthForm = () => {
         } else {
           navigate("/", { replace: true });
           authCtx.login(data.idToken);
+          
         }
       } catch (error) {
         alert(error.message);
