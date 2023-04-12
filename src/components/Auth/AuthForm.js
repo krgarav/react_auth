@@ -1,13 +1,13 @@
-import { useState, useRef } from "react";
-import {} from "react-router-dom";
+import { useState, useRef, useContext } from "react";
 import classes from "./AuthForm.module.css";
+import AuthContext from "../../store/auth-context";
 const API_KEY = "AIzaSyDnbKDecPHNF506oEEq1Nf-QaQybqnXiRg";
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsloading] = useState(false);
   const emailRef = useRef();
   const passwordRef = useRef();
-
+  const authCtx = useContext(AuthContext);
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
   };
@@ -16,11 +16,7 @@ const AuthForm = () => {
     event.preventDefault();
     const enteredEmail = emailRef.current.value;
     const enteredPassword = passwordRef.current.value;
-    const obj = {
-      email: enteredEmail,
-      password: enteredPassword,
-      returnSecureToken: true,
-    };
+
     setIsloading(true);
     if (!isLogin) {
       try {
@@ -29,13 +25,17 @@ const AuthForm = () => {
             API_KEY,
           {
             method: "POST",
-            body: JSON.stringify(obj),
+            body: JSON.stringify({
+              email: enteredEmail,
+              password: enteredPassword,
+              returnSecureToken: true,
+            }),
             headers: {
               "Content-Type": "application/json",
             },
           }
         );
-
+        setIsloading(false);
         const data = await response.json();
 
         if (data.error) {
@@ -45,8 +45,34 @@ const AuthForm = () => {
         alert(error.message);
       }
     } else {
+      try {
+        const response = await fetch(
+          "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" +
+            API_KEY,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: enteredEmail,
+              password: enteredPassword,
+              returnSecureToken: true,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        setIsloading(false);
+        const data = await response.json();
+        if (data.error) {
+          throw data.error;
+        } else {
+          console.log(data.idToken);
+          authCtx.login(data.idToken);
+        }
+      } catch (error) {
+        alert(error.message);
+      }
     }
-    setIsloading(false);
     emailRef.current.value = "";
     passwordRef.current.value = "";
   };
@@ -64,8 +90,10 @@ const AuthForm = () => {
         </div>
 
         <div className={classes.actions}>
-          {!isLoading&&<button>{isLogin ? "Login" : "Create Account"}</button>}
-          {isLoading&&<p>Sending Request...</p>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
+          {isLoading && <p>Sending Request...</p>}
           <button
             type="button"
             className={classes.toggle}
