@@ -1,9 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import AuthContext from "../../store/auth-context";
 import classes from "./ProfileForm.module.css";
 import { useContext, useRef } from "react";
 const ProfileForm = () => {
   const authCtx = useContext(AuthContext);
   const passwordRef = useRef();
+  const navigate = useNavigate();
   const submitHandler = async (event) => {
     event.preventDefault();
     console.log("entered");
@@ -16,7 +18,7 @@ const ProfileForm = () => {
           body: JSON.stringify({
             idToken: authCtx.token,
             password: enteredPassword,
-            returnSecureToken: false,
+            returnSecureToken: true,
           }),
           headers: {
             "Content-Type": "application/json",
@@ -24,12 +26,13 @@ const ProfileForm = () => {
         }
       );
       const data = await response.json();
-      if(data.error){
-        throw data.error
+      if (data.error) {
+        throw data.error;
       }
+      navigate("/auth", { replace: true });
       alert("password changed successfully");
     } catch (error) {
-    alert(error.message)
+      alert(error.message);
       console.log(error);
     }
   };
