@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 const AuthContext = React.createContext({
   token: "",
   isLoggedIn: false,
@@ -9,11 +10,17 @@ const AuthContext = React.createContext({
 export const AuthContextProvider = (props) => {
   const initialToken = localStorage.getItem("id");
   const [token, setToken] = useState(initialToken);
+  // const navigate = useNavigate();
   const userIsLoggedIn = !!token;
 
   const loginHandler = (token) => {
     setToken(token);
     localStorage.setItem("id", token);
+    setTimeout(() => {
+      localStorage.removeItem("id");
+      // navigate("/")
+      setToken(null);
+    }, 300000);
   };
   const logoutHandler = () => {
     setToken(null);
